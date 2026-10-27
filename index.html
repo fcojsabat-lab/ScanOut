@@ -205,8 +205,8 @@
     <script>
         lucide.createIcons();
 
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzBzEw48R_Rc-CvJSR8osuABBjTfh_9lCwBd3pbCNPdoySzem-cMG5sEZe27MRwoPpLXQ/exec";
-        
+        // Nueva URL del despliegue de Google Apps Script
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzLdgDDA3Dvh7yfI7cy86GbrOG7chv0Gi6AyK4b6-ERjRuUZOmxJcyedYQ9GozhcuMcOA/exec";
         const apiKeyInput = document.getElementById('apiKeyInput');
         
         if (localStorage.getItem('gemini_api_key')) {
@@ -332,11 +332,11 @@
             if (!file) return;
 
             btnEnviar.disabled = true;
-            btnEnviar.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Analizando con IA...`;
+            btnEnviar.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Procesando en servidor con IA...`;
             lucide.createIcons();
 
             statusMessage.classList.remove('hidden', 'bg-rose-500/10', 'text-rose-500', 'border-rose-500/20', 'bg-emerald-500/10', 'text-emerald-500', 'border-emerald-500/20');
-            statusMessage.textContent = "Analizando boleta en tu dispositivo...";
+            statusMessage.textContent = "Comprimiendo e instalando la imagen...";
             statusMessage.className = "mt-4 text-center text-xs font-medium p-3 rounded-xl border bg-brand-500/10 text-brand-400 border-brand-500/20";
 
             const reader = new FileReader();
@@ -364,75 +364,29 @@
                     const base64Data = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
 
                     try {
-                        let aiResult = null;
-                        let lastError = null;
-                        
-                        // Configuración del modelo actualizado gemini-3.8-flash
-                        const modelsToTry = ["gemini-3.8-flash"];
+                        statusMessage.textContent = "Enviando imagen a Google Sheets para análisis con IA...";
 
-                        for (let modelName of modelsToTry) {
-                            try {
-                                statusMessage.textContent = `Analizando con IA (${modelName})...`;
-                                
-                                const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${activeApiKey}`, {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({
-                                        contents: [{
-                                            parts: [
-                                                { text: "Analiza esta boleta y devuelve UNICAMENTE un objeto JSON estricto con esta estructura exacta, sin bloques de código markdown ni texto adicional: {\"fecha\": \"YYYY-MM-DD\", \"comercio\": \"Nombre\", \"monto\": 0.00, \"moneda\": \"CLP\", \"categoria\": \"Supermercado/Restaurante/Transporte/Otros\"}. Si algún dato no se ve, pon null." },
-                                                { inline_data: { mime_type: "image/jpeg", data: base64Data } }
-                                            ]
-                                        }]
-                                    })
-                                });
-
-                                const resJson = await aiResponse.json();
-                                if (resJson.error) {
-                                    throw new Error(resJson.error.message);
-                                }
-                                
-                                aiResult = resJson;
-                                break; 
-                            } catch (err) {
-                                lastError = err;
-                                console.warn(`Fallo con ${modelName}, intentando siguiente...`);
-                            }
-                        }
-
-                        if (!aiResult) {
-                            throw new Error(lastError ? lastError.message : "Todos los modelos están saturados en este momento.");
-                        }
-
-                        let rawText = aiResult.candidates[0].content.parts[0].text;
-                        rawText = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
-                        const datosBoleta = JSON.parse(rawText);
-
-                        statusMessage.textContent = "Guardando en Google Sheets...";
-
-                        const saveResponse = await fetch(WEB_APP_URL, {
+                        // Envío directo al servidor en code.gs
+                        const response = await fetch(WEB_APP_URL, {
                             method: 'POST',
                             body: JSON.stringify({
-                                fecha: datosBoleta.fecha || "",
-                                comercio: datosBoleta.comercio || "Desconocido",
-                                monto: datosBoleta.monto || 0,
-                                moneda: datosBoleta.moneda || "CLP",
-                                categoria: datosBoleta.categoria || "Otros",
+                                imagenBase64: base64Data,
+                                apiKey: activeApiKey,
                                 comentario: comentario
                             })
                         });
 
-                        const saveResult = await saveResponse.json();
+                        const result = await response.json();
 
-                        if (saveResult.status === 'success') {
-                            statusMessage.textContent = `¡Éxito! ${datosBoleta.comercio} - $${Number(datosBoleta.monto).toLocaleString('es-CL')} guardado.`;
+                        if (result.status === 'success') {
+                            statusMessage.textContent = result.message;
                             statusMessage.className = "mt-4 text-center text-xs font-medium p-3 rounded-xl border bg-emerald-500/10 text-emerald-500 border-emerald-500/20";
                             boletaForm.reset();
                             previewContainer.classList.add('hidden');
                             uploadPlaceholder.classList.remove('hidden');
                             cargarDashboard();
                         } else {
-                            throw new Error(saveResult.message || "Error al guardar en Sheets");
+                            throw new Error(result.message || "Error al procesar la boleta");
                         }
 
                     } catch (error) {
