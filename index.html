@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ScanOut - Control de Gastos</title>
     
-    <!-- ÍCONOS Y FAVICON PARA LA PANTALLA DE INICIO DEL TELÉFONO -->
+    <!-- FAVICON E ÍCONOS PWA -->
     <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/d/1R20OrU129nlZ9zE_hqRTKeM0aFKVjmSJ">
     <link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/d/1R20OrU129nlZ9zE_hqRTKeM0aFKVjmSJ">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -37,10 +37,12 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Tesseract.js (OCR Local en el Navegador) -->
+    <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center justify-center p-4 transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100 bg-slate-50 text-slate-900">
-
-    <!-- BOTÓN FLOTANTE CAMBIO DE TEMA -->
+    
+    <!-- BOTÓN CAMBIO DE TEMA -->
     <button onclick="toggleTheme()" class="absolute top-4 right-4 p-2.5 rounded-xl bg-slate-800 dark:bg-slate-900 border border-slate-700 shadow-md hover:bg-slate-700 text-brand-500 transition">
         <i data-lucide="sun" class="hidden dark:block w-5 h-5"></i>
         <i data-lucide="moon" class="block dark:hidden w-5 h-5"></i>
@@ -53,9 +55,8 @@
                 <img src="https://lh3.googleusercontent.com/d/1R20OrU129nlZ9zE_hqRTKeM0aFKVjmSJ" alt="ScanOut Logo" class="w-full h-full object-cover">
             </div>
             <h1 class="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">Scan<span class="text-brand-500">Out</span></h1>
-            <p class="text-xs text-slate-500 mt-1">Control inteligente de tarjetas de crédito</p>
+            <p class="text-xs text-slate-500 mt-1">Control inteligente de gastos y boletas</p>
         </div>
-
         <form id="loginForm" class="space-y-4">
             <div>
                 <label class="block text-xs font-semibold uppercase tracking-wider mb-1.5 text-slate-500 dark:text-slate-400">Usuario</label>
@@ -67,7 +68,6 @@
                         class="w-full pl-10 pr-3 py-3 bg-slate-950 dark:bg-slate-950 bg-slate-100 border border-slate-800 dark:border-slate-800 border-slate-300 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-brand-500 transition text-sm">
                 </div>
             </div>
-
             <div>
                 <label class="block text-xs font-semibold uppercase tracking-wider mb-1.5 text-slate-500 dark:text-slate-400">Contraseña</label>
                 <div class="relative">
@@ -78,25 +78,10 @@
                         class="w-full pl-10 pr-3 py-3 bg-slate-950 dark:bg-slate-950 bg-slate-100 border border-slate-800 dark:border-slate-800 border-slate-300 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-brand-500 transition text-sm">
                 </div>
             </div>
-
-            <!-- Campo para API Key de Gemini -->
-            <div>
-                <label class="block text-xs font-semibold uppercase tracking-wider mb-1.5 text-slate-500 dark:text-slate-400">Gemini API Key</label>
-                <div class="relative">
-                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                        <i data-lucide="key" class="w-4 h-4"></i>
-                    </span>
-                    <input type="password" id="apiKeyInput" placeholder="Pega o actualiza tu API Key"
-                        class="w-full pl-10 pr-3 py-3 bg-slate-950 dark:bg-slate-950 bg-slate-100 border border-slate-800 dark:border-slate-800 border-slate-300 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-brand-500 transition text-sm">
-                </div>
-                <span class="text-[10px] text-slate-500 mt-1 block">Se guardará de forma segura en tu navegador.</span>
-            </div>
-
             <button type="submit"
                 class="w-full py-3.5 px-4 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-xl transition duration-200 shadow-lg shadow-brand-600/30 flex items-center justify-center gap-2">
                 <i data-lucide="log-in" class="w-5 h-5"></i> Entrar al Sistema
             </button>
-
             <div id="loginError" class="text-rose-500 text-xs text-center font-medium hidden">Usuario o contraseña incorrectos</div>
         </form>
     </div>
@@ -104,7 +89,7 @@
     <!-- PANTALLA PRINCIPAL -->
     <div id="appContainer" class="w-full max-w-xl bg-slate-900 dark:bg-slate-900 bg-white rounded-3xl shadow-2xl p-6 md:p-8 border border-slate-800 dark:border-slate-800 border-slate-200 hidden my-6">
         
-        <!-- HEADER DE LA APP -->
+        <!-- HEADER -->
         <div class="flex justify-between items-center mb-6 border-b border-slate-800 dark:border-slate-800 border-slate-200 pb-4">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-700 to-brand-500 flex items-center justify-center shadow-md overflow-hidden">
@@ -142,13 +127,13 @@
                             <i data-lucide="upload-cloud" class="w-6 h-6"></i>
                         </div>
                         <p class="text-sm font-semibold text-slate-300">Toca para tomar foto o subir boleta</p>
-                        <p class="text-xs text-slate-500">Soporta JPG, PNG (Cámara integrada en móviles)</p>
+                        <p class="text-xs text-slate-500">Procesamiento OCR local e instantáneo en tu teléfono</p>
                     </div>
 
                     <!-- Vista previa -->
                     <div id="previewContainer" class="hidden relative">
                         <img id="imagePreview" class="mx-auto max-h-52 rounded-xl border border-slate-700 object-contain shadow-md">
-                        <span class="absolute bottom-2 right-2 bg-black/70 text-white text-[10px] px-2 py-1 rounded-md">Foto lista para analizar</span>
+                        <span class="absolute bottom-2 right-2 bg-black/70 text-white text-[10px] px-2 py-1 rounded-md">Foto cargada</span>
                     </div>
                 </div>
 
@@ -160,14 +145,14 @@
 
                 <button type="submit" id="btnEnviar"
                     class="w-full py-4 px-4 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-xl transition duration-200 shadow-lg shadow-brand-600/30 flex items-center justify-center gap-2">
-                    <i data-lucide="cpu" class="w-5 h-5"></i> Procesar con IA y Guardar
+                    <i data-lucide="scan" class="w-5 h-5"></i> Procesar y Guardar Gasto
                 </button>
             </form>
 
             <div id="statusMessage" class="mt-4 text-center text-xs hidden font-medium p-3 rounded-xl border"></div>
         </div>
 
-        <!-- SECCIÓN 2: DASHBOARD VISUAL -->
+        <!-- SECCIÓN 2: DASHBOARD -->
         <div id="viewDashboard" class="space-y-6 hidden">
             <div class="grid grid-cols-2 gap-4">
                 <div class="bg-slate-950 dark:bg-slate-950 bg-slate-100 p-4 rounded-2xl border border-slate-800 dark:border-slate-800 border-slate-200">
@@ -192,7 +177,6 @@
                 </div>
             </div>
 
-            <!-- Últimos registros rápidos -->
             <div class="bg-slate-950 dark:bg-slate-950 bg-slate-100 p-4 rounded-2xl border border-slate-800 dark:border-slate-800 border-slate-200">
                 <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Historial Reciente</h4>
                 <div id="recentList" class="space-y-2 text-xs text-slate-300">
@@ -204,14 +188,9 @@
 
     <script>
         lucide.createIcons();
-
-        // Nueva URL del despliegue de Google Apps Script
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwzHan6DqDxydwCSrb6KLuNbj3uoOlip6nMM67PgDTXnYZL3Wwi0o-J0qV9ObY3jYVuLg/exec";
-        const apiKeyInput = document.getElementById('apiKeyInput');
         
-        if (localStorage.getItem('gemini_api_key')) {
-            apiKeyInput.value = localStorage.getItem('gemini_api_key');
-        }
+        // Nueva URL de tu despliegue en Google Apps Script
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwdrRPRfq6718eixhC5_xPMeG6DsASKrkyogKCTpW5BGu-wAoYQZjJ2VT9w0Mw8Yzm2/exec";
 
         function toggleTheme() {
             const html = document.documentElement;
@@ -236,7 +215,6 @@
         const loginForm = document.getElementById('loginForm');
         const loginError = document.getElementById('loginError');
         const btnLogout = document.getElementById('btnLogout');
-
         const fotoInput = document.getElementById('fotoInput');
         const imagePreview = document.getElementById('imagePreview');
         const previewContainer = document.getElementById('previewContainer');
@@ -255,11 +233,6 @@
             e.preventDefault();
             const user = document.getElementById('userInput').value.trim();
             const pass = document.getElementById('passInput').value.trim();
-            const customKey = apiKeyInput.value.trim();
-
-            if (customKey) {
-                localStorage.setItem('gemini_api_key', customKey);
-            }
 
             if (user === 'Renata' && pass === 'Controlboleta') {
                 localStorage.setItem('sesion_activa', 'true');
@@ -267,9 +240,6 @@
                 loginContainer.classList.add('hidden');
                 appContainer.classList.remove('hidden');
                 loginForm.reset();
-                if (localStorage.getItem('gemini_api_key')) {
-                    apiKeyInput.value = localStorage.getItem('gemini_api_key');
-                }
                 cargarDashboard();
             } else {
                 loginError.classList.remove('hidden');
@@ -280,9 +250,6 @@
             localStorage.removeItem('sesion_activa');
             appContainer.classList.add('hidden');
             loginContainer.classList.remove('hidden');
-            if (localStorage.getItem('gemini_api_key')) {
-                apiKeyInput.value = localStorage.getItem('gemini_api_key');
-            }
         });
 
         function switchTab(tab) {
@@ -318,91 +285,150 @@
             }
         });
 
+        // PARSER LOCAL DE TEXTO PARA EXTRAER COMERCIO, FECHA Y MONTO
+        function parsearBoletaLocal(texto) {
+            let lineas = texto.split("\n").map(l => l.trim()).filter(l => l.length > 0);
+            let comercio = "Comercio General";
+            let monto = 0;
+            let fecha = new Date().toISOString().substring(0, 10);
+
+            // 1. Extraer comercio
+            for (let i = 0; i < Math.min(lineas.length, 6); i++) {
+                let lUpper = lineas[i].toUpperCase();
+                if (!lUpper.includes("R.U.T") && !lUpper.includes("RUT") && !lUpper.includes("BOLETA") && lineas[i].length > 2) {
+                    comercio = lineas[i];
+                    break;
+                }
+            }
+
+            // 2. Extraer Fecha de emisión
+            for (let i = 0; i < lineas.length; i++) {
+                let lUpper = lineas[i].toUpperCase();
+                if (lUpper.includes("FECHA") || lUpper.includes("EMISION")) {
+                    let match = lineas[i].match(/(\d{2}[-\/]\d{2}[-\/]\d{4}|\d{4}[-\/]\d{2}[-\/]\d{2})/);
+                    if (match) {
+                        let partes = match[0].split(/[-\/]/);
+                        fecha = partes[0].length === 4 ? `${partes[0]}-${partes[1]}-${partes[2]}` : `${partes[2]}-${partes[1]}-${partes[0]}`;
+                        break;
+                    }
+                }
+            }
+
+            // 3. Extraer Monto Total
+            for (let i = 0; i < lineas.length; i++) {
+                let lUpper = lineas[i].toUpperCase();
+                if (lUpper.includes("TOTAL") || lUpper.includes("MONTO")) {
+                    let textoContexto = lineas[i] + " " + (lineas[i+1] || "");
+                    let matchNum = textoContexto.match(/([\d]{1,3}(\.[\d]{3})+|\d+)/g);
+                    if (matchNum && matchNum.length > 0) {
+                        let val = Number(matchNum[matchNum.length - 1].replace(/[^\d]/g, ""));
+                        if (val > 500 && val < 50000000) {
+                            monto = val;
+                        }
+                    }
+                }
+            }
+
+            if (monto === 0) {
+                let todosLosNumeros = texto.match(/([\d]{1,3}(\.[\d]{3})+)/g);
+                if (todosLosNumeros && todosLosNumeros.length > 0) {
+                    for (let m = todosLosNumeros.length - 1; m >= 0; m--) {
+                        let limpio = Number(todosLosNumeros[m].replace(/[^\d]/g, ""));
+                        if (limpio > 1000 && limpio < 50000000) {
+                            monto = limpio;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            return { comercio, fecha, monto, textoCompleto: texto };
+        }
+
         boletaForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             const file = fotoInput.files[0];
             const comentario = document.getElementById('comentarioInput').value;
-            const activeApiKey = localStorage.getItem('gemini_api_key');
-
-            if (!activeApiKey) {
-                alert("Falta configurar la API Key de Gemini. Por favor vuelve a iniciar sesión e ingrésala.");
-                return;
-            }
 
             if (!file) return;
 
             btnEnviar.disabled = true;
-            btnEnviar.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Procesando en servidor con IA...`;
+            btnEnviar.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Leyendo boleta localmente...`;
             lucide.createIcons();
 
-            statusMessage.classList.remove('hidden', 'bg-rose-500/10', 'text-rose-500', 'border-rose-500/20', 'bg-emerald-500/10', 'text-emerald-500', 'border-emerald-500/20');
-            statusMessage.textContent = "Comprimiendo e instalando la imagen...";
+            statusMessage.classList.remove('hidden');
+            statusMessage.textContent = "Ejecutando OCR local en el navegador (Tesseract)...";
             statusMessage.className = "mt-4 text-center text-xs font-medium p-3 rounded-xl border bg-brand-500/10 text-brand-400 border-brand-500/20";
 
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = function(event) {
-                const img = new Image();
-                img.src = event.target.result;
-                img.onload = async function() {
-                    const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 1000;
-                    const MAX_HEIGHT = 1000;
-                    let width = img.width;
-                    let height = img.height;
+            try {
+                // 1. OCR en el navegador del celular con Tesseract.js
+                const result = await Tesseract.recognize(file, 'spa');
+                const datosExtraidos = parsearBoletaLocal(result.data.text);
 
-                    if (width > height) {
-                        if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
-                    } else {
-                        if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
-                    }
+                statusMessage.textContent = "Guardando datos y foto en Google Sheets...";
 
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-                    const base64Data = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+                // 2. Convertir imagen a Base64 para enviar
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = async function(event) {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = async function() {
+                        const canvas = document.createElement('canvas');
+                        const MAX_WIDTH = 1000;
+                        let width = img.width;
+                        let height = img.height;
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        const base64Data = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
 
-                    try {
-                        statusMessage.textContent = "Enviando imagen a Google Sheets para análisis con IA...";
-
-                        // Envío directo al servidor en code.gs
+                        // 3. Enviar datos extraídos a Google Apps Script
                         const response = await fetch(WEB_APP_URL, {
                             method: 'POST',
                             body: JSON.stringify({
                                 imagenBase64: base64Data,
-                                apiKey: activeApiKey,
+                                comercio: datosExtraidos.comercio,
+                                fecha: datosExtraidos.fecha,
+                                monto: datosExtraidos.monto,
+                                textoOCR: datosExtraidos.textoCompleto,
                                 comentario: comentario
                             })
                         });
 
-                        const result = await response.json();
-
-                        if (result.status === 'success') {
-                            statusMessage.textContent = result.message;
+                        const resJson = await response.json();
+                        if (resJson.status === 'success') {
+                            statusMessage.textContent = "¡Gasto de " + datosExtraidos.comercio + " ($" + datosExtraidos.monto + ") guardado con éxito!";
                             statusMessage.className = "mt-4 text-center text-xs font-medium p-3 rounded-xl border bg-emerald-500/10 text-emerald-500 border-emerald-500/20";
                             boletaForm.reset();
                             previewContainer.classList.add('hidden');
                             uploadPlaceholder.classList.remove('hidden');
                             cargarDashboard();
                         } else {
-                            throw new Error(result.message || "Error al procesar la boleta");
+                            throw new Error(resJson.message);
                         }
 
-                    } catch (error) {
-                        statusMessage.textContent = "Error: " + error.message;
-                        statusMessage.className = "mt-4 text-center text-xs font-medium p-3 rounded-xl border bg-rose-500/10 text-rose-500 border-rose-500/20";
-                    } finally {
                         btnEnviar.disabled = false;
-                        btnEnviar.innerHTML = `<i data-lucide="cpu" class="w-5 h-5"></i> Procesar con IA y Guardar`;
+                        btnEnviar.innerHTML = `<i data-lucide="scan" class="w-5 h-5"></i> Procesar y Guardar Gasto`;
                         lucide.createIcons();
                     }
-                }
-            };
+                };
+
+            } catch (error) {
+                statusMessage.textContent = "Error: " + error.message;
+                statusMessage.className = "mt-4 text-center text-xs font-medium p-3 rounded-xl border bg-rose-500/10 text-rose-500 border-rose-500/20";
+                btnEnviar.disabled = false;
+                btnEnviar.innerHTML = `<i data-lucide="scan" class="w-5 h-5"></i> Procesar y Guardar Gasto`;
+                lucide.createIcons();
+            }
         });
 
         let chartInstance = null;
-
         async function cargarDashboard() {
             try {
                 const response = await fetch(WEB_APP_URL);
