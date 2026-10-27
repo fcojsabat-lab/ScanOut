@@ -11,7 +11,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="ScanOut">
-
+    
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -67,6 +67,7 @@
                         class="w-full pl-10 pr-3 py-3 bg-slate-950 dark:bg-slate-950 bg-slate-100 border border-slate-800 dark:border-slate-800 border-slate-300 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-brand-500 transition text-sm">
                 </div>
             </div>
+
             <div>
                 <label class="block text-xs font-semibold uppercase tracking-wider mb-1.5 text-slate-500 dark:text-slate-400">Contraseña</label>
                 <div class="relative">
@@ -77,16 +78,25 @@
                         class="w-full pl-10 pr-3 py-3 bg-slate-950 dark:bg-slate-950 bg-slate-100 border border-slate-800 dark:border-slate-800 border-slate-300 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-brand-500 transition text-sm">
                 </div>
             </div>
-            <!-- Campo para API Key si no está configurada -->
-            <div id="apiKeyFieldContainer" class="hidden">
+
+            <!-- Campo para API Key de Gemini (siempre disponible en el login) -->
+            <div>
                 <label class="block text-xs font-semibold uppercase tracking-wider mb-1.5 text-slate-500 dark:text-slate-400">Gemini API Key</label>
-                <input type="password" id="apiKeyInput" placeholder="Pega tu API Key de Gemini"
-                    class="w-full px-3 py-3 bg-slate-950 dark:bg-slate-950 bg-slate-100 border border-slate-800 dark:border-slate-800 border-slate-300 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-brand-500 transition text-sm">
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                        <i data-lucide="key" class="w-4 h-4"></i>
+                    </span>
+                    <input type="password" id="apiKeyInput" placeholder="Pega o actualiza tu API Key"
+                        class="w-full pl-10 pr-3 py-3 bg-slate-950 dark:bg-slate-950 bg-slate-100 border border-slate-800 dark:border-slate-800 border-slate-300 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-brand-500 transition text-sm">
+                </div>
+                <span class="text-[10px] text-slate-500 mt-1 block">Se guardará de forma segura en tu navegador.</span>
             </div>
+
             <button type="submit"
                 class="w-full py-3.5 px-4 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-xl transition duration-200 shadow-lg shadow-brand-600/30 flex items-center justify-center gap-2">
                 <i data-lucide="log-in" class="w-5 h-5"></i> Entrar al Sistema
             </button>
+
             <div id="loginError" class="text-rose-500 text-xs text-center font-medium hidden">Usuario o contraseña incorrectos</div>
         </form>
     </div>
@@ -126,6 +136,7 @@
                 <div class="border-2 border-dashed border-slate-700 hover:border-brand-500 transition rounded-2xl p-6 text-center bg-slate-950/40 dark:bg-slate-950/40 bg-slate-50 relative">
                     <input type="file" id="fotoInput" accept="image/*" capture="environment" required
                         class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                    
                     <div id="uploadPlaceholder" class="space-y-2">
                         <div class="w-12 h-12 rounded-full bg-brand-500/10 text-brand-500 flex items-center justify-center mx-auto">
                             <i data-lucide="upload-cloud" class="w-6 h-6"></i>
@@ -133,6 +144,7 @@
                         <p class="text-sm font-semibold text-slate-300">Toca para tomar foto o subir boleta</p>
                         <p class="text-xs text-slate-500">Soporta JPG, PNG (Cámara integrada en móviles)</p>
                     </div>
+
                     <!-- Vista previa -->
                     <div id="previewContainer" class="hidden relative">
                         <img id="imagePreview" class="mx-auto max-h-52 rounded-xl border border-slate-700 object-contain shadow-md">
@@ -188,19 +200,18 @@
                 </div>
             </div>
         </div>
-
     </div>
 
     <script>
         lucide.createIcons();
 
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxrWjnsyhXGkCbROL9uAhMUjVcXzSDgoANtglqrLx2WApcaFqNFwUg5hJ0GuWHK9rR9/exec";
-
-        const apiKeyFieldContainer = document.getElementById('apiKeyFieldContainer');
+        // Nueva URL de Web App de Google Apps Script configurada
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzBzEw48R_Rc-CvJSR8osuABBjTfh_9lCwBd3pbCNPdoySzem-cMG5sEZe27MRwoPpLXQ/exec";
+        
         const apiKeyInput = document.getElementById('apiKeyInput');
         
-        if (!localStorage.getItem('gemini_api_key')) {
-            apiKeyFieldContainer.classList.remove('hidden');
+        if (localStorage.getItem('gemini_api_key')) {
+            apiKeyInput.value = localStorage.getItem('gemini_api_key');
         }
 
         function toggleTheme() {
@@ -257,6 +268,9 @@
                 loginContainer.classList.add('hidden');
                 appContainer.classList.remove('hidden');
                 loginForm.reset();
+                if (localStorage.getItem('gemini_api_key')) {
+                    apiKeyInput.value = localStorage.getItem('gemini_api_key');
+                }
                 cargarDashboard();
             } else {
                 loginError.classList.remove('hidden');
@@ -267,6 +281,9 @@
             localStorage.removeItem('sesion_activa');
             appContainer.classList.add('hidden');
             loginContainer.classList.remove('hidden');
+            if (localStorage.getItem('gemini_api_key')) {
+                apiKeyInput.value = localStorage.getItem('gemini_api_key');
+            }
         });
 
         function switchTab(tab) {
@@ -309,7 +326,7 @@
             const activeApiKey = localStorage.getItem('gemini_api_key');
 
             if (!activeApiKey) {
-                alert("Falta configurar la API Key de Gemini. Por favor vuelve a iniciar sesión ingresándola.");
+                alert("Falta configurar la API Key de Gemini. Por favor vuelve a iniciar sesión e ingrésala.");
                 return;
             }
 
@@ -318,7 +335,7 @@
             btnEnviar.disabled = true;
             btnEnviar.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Analizando con IA...`;
             lucide.createIcons();
-            
+
             statusMessage.classList.remove('hidden', 'bg-rose-500/10', 'text-rose-500', 'border-rose-500/20', 'bg-emerald-500/10', 'text-emerald-500', 'border-emerald-500/20');
             statusMessage.textContent = "Analizando boleta en tu dispositivo...";
             statusMessage.className = "mt-4 text-center text-xs font-medium p-3 rounded-xl border bg-brand-500/10 text-brand-400 border-brand-500/20";
@@ -345,19 +362,18 @@
                     canvas.height = height;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
-
                     const base64Data = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
 
                     try {
                         let aiResult = null;
                         let lastError = null;
                         
-                        // Sistema de reintento automático con múltiples modelos de respaldo
-                        const modelsToTry = ["gemini-3.8-flash", "gemini-2.0-flash", "gemini-1.5-flash"];
+                        const modelsToTry = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"];
 
                         for (let modelName of modelsToTry) {
                             try {
                                 statusMessage.textContent = `Analizando con IA (${modelName})...`;
+                                
                                 const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${activeApiKey}`, {
                                     method: 'POST',
                                     headers: { 'Content-Type': 'application/json' },
@@ -377,7 +393,7 @@
                                 }
                                 
                                 aiResult = resJson;
-                                break; // Si tuvo éxito, salimos del ciclo de respaldos
+                                break; 
                             } catch (err) {
                                 lastError = err;
                                 console.warn(`Fallo con ${modelName}, intentando siguiente...`);
@@ -407,15 +423,16 @@
                         });
 
                         const saveResult = await saveResponse.json();
+
                         if (saveResult.status === 'success') {
-                            statusMessage.textContent = `¡Éxito! ${datosBoleta.comercio} - $${datosBoleta.monto} guardado.`;
+                            statusMessage.textContent = `¡Éxito! ${datosBoleta.comercio} - $${Number(datosBoleta.monto).toLocaleString('es-CL')} guardado.`;
                             statusMessage.className = "mt-4 text-center text-xs font-medium p-3 rounded-xl border bg-emerald-500/10 text-emerald-500 border-emerald-500/20";
                             boletaForm.reset();
                             previewContainer.classList.add('hidden');
                             uploadPlaceholder.classList.remove('hidden');
                             cargarDashboard();
                         } else {
-                            throw new Error("Error al guardar en Sheets");
+                            throw new Error(saveResult.message || "Error al guardar en Sheets");
                         }
 
                     } catch (error) {
@@ -431,6 +448,7 @@
         });
 
         let chartInstance = null;
+
         async function cargarDashboard() {
             try {
                 const response = await fetch(WEB_APP_URL);
@@ -484,15 +502,21 @@
             if(gastos.length === 0) {
                 recentList.innerHTML = `<p class="text-slate-500 text-center py-2">No hay gastos registrados aún.</p>`;
             } else {
-                recentList.innerHTML = gastos.slice(-3).reverse().map(g => `
-                    <div class="flex justify-between items-center p-2 rounded-lg bg-slate-900 dark:bg-slate-900 bg-white border border-slate-800">
-                        <div>
-                            <span class="font-semibold text-slate-200">${g.comercio}</span>
-                            <span class="block text-[10px] text-slate-500">${g.categoria} • ${g.fecha || 'Hoy'}</span>
+                recentList.innerHTML = gastos.slice(-3).reverse().map(g => {
+                    let fechaMostrar = 'Hoy';
+                    if (g.fecha) {
+                        fechaMostrar = String(g.fecha).substring(0, 10);
+                    }
+                    return `
+                        <div class="flex justify-between items-center p-2 rounded-lg bg-slate-900 dark:bg-slate-900 bg-white border border-slate-800">
+                            <div>
+                                <span class="font-semibold text-slate-200">${g.comercio}</span>
+                                <span class="block text-[10px] text-slate-500">${g.categoria} • ${fechaMostrar}</span>
+                            </div>
+                            <span class="font-bold text-brand-500">$${Number(g.monto).toLocaleString('es-CL')}</span>
                         </div>
-                        <span class="font-bold text-brand-500">$${Number(g.monto).toLocaleString('es-CL')}</span>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
             }
         }
     </script>
