@@ -349,22 +349,44 @@
                     const base64Data = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
 
                     try {
-                        // Actualizado al modelo gemini-3.8-flash solicitado por la API
-                        const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${activeApiKey}`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                contents: [{
-                                    parts: [
-                                        { text: "Analiza esta boleta y devuelve UNICAMENTE un objeto JSON estricto con esta estructura exacta, sin bloques de código markdown ni texto adicional: {\"fecha\": \"YYYY-MM-DD\", \"comercio\": \"Nombre\", \"monto\": 0.00, \"moneda\": \"CLP\", \"categoria\": \"Supermercado/Restaurante/Transporte/Otros\"}. Si algún dato no se ve, pon null." },
-                                        { inline_data: { mime_type: "image/jpeg", data: base64Data } }
-                                    ]
-                                }]
-                            })
-                        });
+                        let aiResult = null;
+                        let lastError = null;
+                        
+                        // Sistema de reintento automático con múltiples modelos de respaldo
+                        const modelsToTry = ["gemini-3.8-flash", "gemini-2.0-flash", "gemini-1.5-flash"];
 
-                        const aiResult = await aiResponse.json();
-                        if (aiResult.error) throw new Error(aiResult.error.message);
+                        for (let modelName of modelsToTry) {
+                            try {
+                                statusMessage.textContent = `Analizando con IA (${modelName})...`;
+                                const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${activeApiKey}`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        contents: [{
+                                            parts: [
+                                                { text: "Analiza esta boleta y devuelve UNICAMENTE un objeto JSON estricto con esta estructura exacta, sin bloques de código markdown ni texto adicional: {\"fecha\": \"YYYY-MM-DD\", \"comercio\": \"Nombre\", \"monto\": 0.00, \"moneda\": \"CLP\", \"categoria\": \"Supermercado/Restaurante/Transporte/Otros\"}. Si algún dato no se ve, pon null." },
+                                                { inline_data: { mime_type: "image/jpeg", data: base64Data } }
+                                            ]
+                                        }]
+                                    })
+                                });
+
+                                const resJson = await aiResponse.json();
+                                if (resJson.error) {
+                                    throw new Error(resJson.error.message);
+                                }
+                                
+                                aiResult = resJson;
+                                break; // Si tuvo éxito, salimos del ciclo de respaldos
+                            } catch (err) {
+                                lastError = err;
+                                console.warn(`Fallo con ${modelName}, intentando siguiente...`);
+                            }
+                        }
+
+                        if (!aiResult) {
+                            throw new Error(lastError ? lastError.message : "Todos los modelos están saturados en este momento.");
+                        }
 
                         let rawText = aiResult.candidates[0].content.parts[0].text;
                         rawText = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
