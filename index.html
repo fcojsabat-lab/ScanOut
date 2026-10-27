@@ -77,7 +77,7 @@
                         class="w-full pl-10 pr-3 py-3 bg-slate-950 dark:bg-slate-950 bg-slate-100 border border-slate-800 dark:border-slate-800 border-slate-300 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-brand-500 transition text-sm">
                 </div>
             </div>
-            <!-- Campo oculto o automático para API Key si no está configurada -->
+            <!-- Campo para API Key si no está configurada -->
             <div id="apiKeyFieldContainer" class="hidden">
                 <label class="block text-xs font-semibold uppercase tracking-wider mb-1.5 text-slate-500 dark:text-slate-400">Gemini API Key</label>
                 <input type="password" id="apiKeyInput" placeholder="Pega tu API Key de Gemini"
@@ -196,7 +196,6 @@
 
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxrWjnsyhXGkCbROL9uAhMUjVcXzSDgoANtglqrLx2WApcaFqNFwUg5hJ0GuWHK9rR9/exec";
 
-        // Si no hay API Key guardada en el navegador, mostrar el campo para ingresarla
         const apiKeyFieldContainer = document.getElementById('apiKeyFieldContainer');
         const apiKeyInput = document.getElementById('apiKeyInput');
         
@@ -350,7 +349,8 @@
                     const base64Data = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
 
                     try {
-                        const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${activeApiKey}`, {
+                        // Actualizado al modelo gemini-3.8-flash solicitado por la API
+                        const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${activeApiKey}`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
