@@ -79,7 +79,7 @@
                 </div>
             </div>
 
-            <!-- Campo para API Key de Gemini (siempre disponible en el login) -->
+            <!-- Campo para API Key de Gemini -->
             <div>
                 <label class="block text-xs font-semibold uppercase tracking-wider mb-1.5 text-slate-500 dark:text-slate-400">Gemini API Key</label>
                 <div class="relative">
@@ -101,7 +101,7 @@
         </form>
     </div>
 
-    <!-- PANTALLA PRINCIPAL (OCULTA HASTA INICIAR SESIÓN) -->
+    <!-- PANTALLA PRINCIPAL -->
     <div id="appContainer" class="w-full max-w-xl bg-slate-900 dark:bg-slate-900 bg-white rounded-3xl shadow-2xl p-6 md:p-8 border border-slate-800 dark:border-slate-800 border-slate-200 hidden my-6">
         
         <!-- HEADER DE LA APP -->
@@ -205,7 +205,6 @@
     <script>
         lucide.createIcons();
 
-        // Nueva URL de Web App de Google Apps Script configurada
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzBzEw48R_Rc-CvJSR8osuABBjTfh_9lCwBd3pbCNPdoySzem-cMG5sEZe27MRwoPpLXQ/exec";
         
         const apiKeyInput = document.getElementById('apiKeyInput');
@@ -368,7 +367,8 @@
                         let aiResult = null;
                         let lastError = null;
                         
-                        const modelsToTry = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"];
+                        // Modelos actualizados y estables para cliente
+                        const modelsToTry = ["gemini-2.5-flash", "gemini-2.0-flash"];
 
                         for (let modelName of modelsToTry) {
                             try {
