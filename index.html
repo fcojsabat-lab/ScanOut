@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScanOut - Control de Gastos</title>
+    
+    <!-- ÍCONOS Y FAVICON PARA LA PANTALLA DE INICIO DEL TELÉFONO -->
+    <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/d/1R20OrU129nlZ9zE_hqRTKeM0aFKVjmSJ">
+    <link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/d/1R20OrU129nlZ9zE_hqRTKeM0aFKVjmSJ">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ScanOut">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#e6f7ff',
+                            100: '#b3e5fc',
+                            500: '#00b4d8',
+                            600: '#0096c7',
+                            700: '#0077b6',
+                            900: '#03045e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Chart.js para el Dashboard -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center justify-center p-4 transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100 bg-slate-50 text-slate-900">
+
+    <!-- BOTÓN FLOTANTE CAMBIO DE TEMA -->
+    <button onclick="toggleTheme()" class="absolute top-4 right-4 p-2.5 rounded-xl bg-slate-800 dark:bg-slate-900 border border-slate-700 shadow-md hover:bg-slate-700 text-brand-500 transition">
+        <i data-lucide="sun" class="hidden dark:block w-5 h-5"></i>
+        <i data-lucide="moon" class="block dark:hidden w-5 h-5"></i>
+    </button>
+
+    <!-- PANTALLA DE LOGIN -->
+    <div id="loginContainer" class="w-full max-w-md bg-slate-900 dark:bg-slate-900 bg-white rounded-3xl shadow-2xl p-8 border border-slate-800 dark:border-slate-800 border-slate-200">
+        <div class="flex flex-col items-center mb-6">
+            <div class="w-20 h-20 rounded-2xl bg-gradient-to-tr from-brand-700 to-brand-500 flex items-center justify-center shadow-lg shadow-brand-500/20 mb-3 border border-brand-500/30 overflow-hidden">
+                <img src="https://lh3.googleusercontent.com/d/1R20OrU129nlZ9zE_hqRTKeM0aFKVjmSJ" alt="ScanOut Logo" class="w-full h-full object-cover">
+            </div>
+            <h1 class="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">Scan<span class="text-brand-500">Out</span></h1>
+            <p class="text-xs text-slate-500 mt-1">Control inteligente de tarjetas de crédito</p>
+        </div>
+
+        <form id="loginForm" class="space-y-4">
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider mb-1.5 text-slate-500 dark:text-slate-400">Usuario</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                        <i data-lucide="user" class="w-4 h-4"></i>
+                    </span>
+                    <input type="text" id="userInput" required placeholder="Ingresa tu usuario"
+                        class="w-full pl-10 pr-3 py-3 bg-slate-950 dark:bg-slate-950 bg-slate-100 border border-slate-800 dark:border-slate-800 border-slate-300 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-brand-500 transition text-sm">
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider mb-1.5 text-slate-500 dark:text-slate-400">Contraseña</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                        <i data-lucide="lock" class="w-4 h-4"></i>
+                    </span>
+                    <input type="password" id="passInput" required placeholder="••••••••••••"
+                        class="w-full pl-10 pr-3 py-3 bg-slate-950 dark:bg-slate-950 bg-slate-100 border border-slate-800 dark:border-slate-800 border-slate-300 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-brand-500 transition text-sm">
+                </div>
+            </div>
+            <button type="submit"
+                class="w-full py-3.5 px-4 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-xl transition duration-200 shadow-lg shadow-brand-600/30 flex items-center justify-center gap-2">
+                <i data-lucide="log-in" class="w-5 h-5"></i> Entrar al Sistema
+            </button>
+            <div id="loginError" class="text-rose-500 text-xs text-center font-medium hidden">Usuario o contraseña incorrectos</div>
+        </form>
+    </div>
+
+    <!-- PANTALLA PRINCIPAL (OCULTA HASTA INICIAR SESIÓN) -->
+    <div id="appContainer" class="w-full max-w-xl bg-slate-900 dark:bg-slate-900 bg-white rounded-3xl shadow-2xl p-6 md:p-8 border border-slate-800 dark:border-slate-800 border-slate-200 hidden my-6">
+        
+        <!-- HEADER DE LA APP -->
+        <div class="flex justify-between items-center mb-6 border-b border-slate-800 dark:border-slate-800 border-slate-200 pb-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-700 to-brand-500 flex items-center justify-center shadow-md overflow-hidden">
+                    <img src="https://lh3.googleusercontent.com/d/1R20OrU129nlZ9zE_hqRTKeM0aFKVjmSJ" alt="Logo" class="w-full h-full object-cover">
+                </div>
+                <div>
+                    <h2 class="text-lg font-bold text-slate-900 dark:text-white leading-tight">Scan<span class="text-brand-500">Out</span></h2>
+                    <span class="text-xs text-emerald-500 font-medium flex items-center gap-1">● Sesión Activa (Renata)</span>
+                </div>
+            </div>
+            <button id="btnLogout" class="text-xs text-slate-400 hover:text-rose-500 transition flex items-center gap-1 font-medium bg-slate-800/50 dark:bg-slate-800/50 bg-slate-100 px-3 py-1.5 rounded-lg">
+                <i data-lucide="log-out" class="w-3.5 h-3.5"></i> Salir
+            </button>
+        </div>
+
+        <!-- TABS DE NAVEGACIÓN -->
+        <div class="flex bg-slate-950 dark:bg-slate-950 bg-slate-100 p-1.5 rounded-2xl mb-6 border border-slate-800 dark:border-slate-800 border-slate-200">
+            <button onclick="switchTab('scanner')" id="tabScanner" class="flex-1 py-2.5 rounded-xl font-semibold text-xs transition flex items-center justify-center gap-2 bg-brand-600 text-white shadow-md">
+                <i data-lucide="camera" class="w-4 h-4"></i> Escanear Boleta
+            </button>
+            <button onclick="switchTab('dashboard')" id="tabDashboard" class="flex-1 py-2.5 rounded-xl font-semibold text-xs transition flex items-center justify-center gap-2 text-slate-400 hover:text-white">
+                <i data-lucide="pie-chart" class="w-4 h-4"></i> Dashboard Gasto
+            </button>
+        </div>
+
+        <!-- SECCIÓN 1: ESCÁNER DE BOLETAS -->
+        <div id="viewScanner" class="space-y-4">
+            <form id="boletaForm" class="space-y-4">
+                <div class="border-2 border-dashed border-slate-700 hover:border-brand-500 transition rounded-2xl p-6 text-center bg-slate-950/40 dark:bg-slate-950/40 bg-slate-50 relative">
+                    <input type="file" id="fotoInput" accept="image/*" capture="environment" required
+                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                    <div id="uploadPlaceholder" class="space-y-2">
+                        <div class="w-12 h-12 rounded-full bg-brand-500/10 text-brand-500 flex items-center justify-center mx-auto">
+                            <i data-lucide="upload-cloud" class="w-6 h-6"></i>
+                        </div>
+                        <p class="text-sm font-semibold text-slate-300">Toca para tomar foto o subir boleta</p>
+                        <p class="text-xs text-slate-500">Soporta JPG, PNG (Cámara integrada en móviles)</p>
+                    </div>
+                    <!-- Vista previa -->
+                    <div id="previewContainer" class="hidden relative">
+                        <img id="imagePreview" class="mx-auto max-h-52 rounded-xl border border-slate-700 object-contain shadow-md">
+                        <span class="absolute bottom-2 right-2 bg-black/70 text-white text-[10px] px-2 py-1 rounded-md">Foto lista para analizar</span>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider mb-1.5 text-slate-400">Comentario opcional</label>
+                    <input type="text" id="comentarioInput" placeholder="Ej: Cena con clientes, repuestos, supermercado..."
+                        class="w-full px-4 py-3 bg-slate-950 dark:bg-slate-950 bg-slate-100 border border-slate-800 dark:border-slate-800 border-slate-300 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-brand-500 transition text-sm">
+                </div>
+
+                <button type="submit" id="btnEnviar"
+                    class="w-full py-4 px-4 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-xl transition duration-200 shadow-lg shadow-brand-600/30 flex items-center justify-center gap-2">
+                    <i data-lucide="cpu" class="w-5 h-5"></i> Procesar con IA y Guardar
+                </button>
+            </form>
+
+            <div id="statusMessage" class="mt-4 text-center text-xs hidden font-medium p-3 rounded-xl border"></div>
+        </div>
+
+        <!-- SECCIÓN 2: DASHBOARD VISUAL -->
+        <div id="viewDashboard" class="space-y-6 hidden">
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-slate-950 dark:bg-slate-950 bg-slate-100 p-4 rounded-2xl border border-slate-800 dark:border-slate-800 border-slate-200">
+                    <span class="text-xs text-slate-400 font-medium">Gasto Total Acumulado</span>
+                    <h3 id="statTotal" class="text-2xl font-black text-brand-500 mt-1">$0</h3>
+                </div>
+                <div class="bg-slate-950 dark:bg-slate-950 bg-slate-100 p-4 rounded-2xl border border-slate-800 dark:border-slate-800 border-slate-200">
+                    <span class="text-xs text-slate-400 font-medium">Boletas Registradas</span>
+                    <h3 id="statCount" class="text-2xl font-black text-white mt-1">0</h3>
+                </div>
+            </div>
+
+            <div class="bg-slate-950 dark:bg-slate-950 bg-slate-100 p-4 rounded-2xl border border-slate-800 dark:border-slate-800 border-slate-200">
+                <div class="flex justify-between items-center mb-3">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Gastos por Categoría</h4>
+                    <button onclick="cargarDashboard()" class="text-xs text-brand-500 hover:underline flex items-center gap-1">
+                        <i data-lucide="refresh-cw" class="w-3 h-3"></i> Actualizar
+                    </button>
+                </div>
+                <div class="relative h-64 flex items-center justify-center">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Últimos registros rápidos -->
+            <div class="bg-slate-950 dark:bg-slate-950 bg-slate-100 p-4 rounded-2xl border border-slate-800 dark:border-slate-800 border-slate-200">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Historial Reciente</h4>
+                <div id="recentList" class="space-y-2 text-xs text-slate-300">
+                    <p class="text-slate-500 text-center py-2">Cargando registros...</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Inicializar iconos de Lucide
+        lucide.createIcons();
+
+        // Configuración de URL Google Apps Script
+        const WEB_APP_URL = "TU_URL_DE_GOOGLE_APPS_SCRIPT"; // Reemplaza aquí con tu URL de Apps Script
+
+        // Control de Tema Claro / Oscuro
+        function toggleTheme() {
+            const html = document.documentElement;
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('scanout_theme', 'light');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('scanout_theme', 'dark');
+            }
+            if(chartInstance) updateChartColors();
+        }
+
+        // Cargar tema guardado
+        if (localStorage.getItem('scanout_theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+        } else {
+            document.documentElement.classList.add('dark');
+        }
+
+        // Referencias DOM
+        const loginContainer = document.getElementById('loginContainer');
+        const appContainer = document.getElementById('appContainer');
+        const loginForm = document.getElementById('loginForm');
+        const loginError = document.getElementById('loginError');
+        const btnLogout = document.getElementById('btnLogout');
+
+        const fotoInput = document.getElementById('fotoInput');
+        const imagePreview = document.getElementById('imagePreview');
+        const previewContainer = document.getElementById('previewContainer');
+        const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+        const boletaForm = document.getElementById('boletaForm');
+        const btnEnviar = document.getElementById('btnEnviar');
+        const statusMessage = document.getElementById('statusMessage');
+
+        // Validar sesión activa previa
+        if (localStorage.getItem('sesion_activa') === 'true') {
+            loginContainer.classList.add('hidden');
+            appContainer.classList.remove('hidden');
+            cargarDashboard();
+        }
+
+        // Login
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const user = document.getElementById('userInput').value.trim();
+            const pass = document.getElementById('passInput').value.trim();
+
+            if (user === 'Renata' && pass === 'Controlboleta') {
+                localStorage.setItem('sesion_activa', 'true');
+                loginError.classList.add('hidden');
+                loginContainer.classList.add('hidden');
+                appContainer.classList.remove('hidden');
+                loginForm.reset();
+                cargarDashboard();
+            } else {
+                loginError.classList.remove('hidden');
+            }
+        });
+
+        // Logout
+        btnLogout.addEventListener('click', function() {
+            localStorage.removeItem('sesion_activa');
+            appContainer.classList.add('hidden');
+            loginContainer.classList.remove('hidden');
+        });
+
+        // Cambiar pestañas (Scanner / Dashboard)
+        function switchTab(tab) {
+            const tabScanner = document.getElementById('tabScanner');
+            const tabDashboard = document.getElementById('tabDashboard');
+            const viewScanner = document.getElementById('viewScanner');
+            const viewDashboard = document.getElementById('viewDashboard');
+
+            if (tab === 'scanner') {
+                tabScanner.className = "flex-1 py-2.5 rounded-xl font-semibold text-xs transition flex items-center justify-center gap-2 bg-brand-600 text-white shadow-md";
+                tabDashboard.className = "flex-1 py-2.5 rounded-xl font-semibold text-xs transition flex items-center justify-center gap-2 text-slate-400 hover:text-white";
+                viewScanner.classList.remove('hidden');
+                viewDashboard.classList.add('hidden');
+            } else {
+                tabDashboard.className = "flex-1 py-2.5 rounded-xl font-semibold text-xs transition flex items-center justify-center gap-2 bg-brand-600 text-white shadow-md";
+                tabScanner.className = "flex-1 py-2.5 rounded-xl font-semibold text-xs transition flex items-center justify-center gap-2 text-slate-400 hover:text-white";
+                viewDashboard.classList.remove('hidden');
+                viewScanner.classList.add('hidden');
+                cargarDashboard();
+            }
+        }
+
+        // Vista previa de imagen
+        fotoInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    imagePreview.src = evt.target.result;
+                    uploadPlaceholder.classList.add('hidden');
+                    previewContainer.classList.remove('hidden');
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Enviar boleta a Google Apps Script
+        boletaForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const file = fotoInput.files[0];
+            const comentario = document.getElementById('comentarioInput').value;
+
+            if (!file) return;
+
+            btnEnviar.disabled = true;
+            btnEnviar.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Analizando con IA...`;
+            lucide.createIcons();
+            
+            statusMessage.classList.remove('hidden', 'bg-rose-500/10', 'text-rose-500', 'border-rose-500/20', 'bg-emerald-500/10', 'text-emerald-500', 'border-emerald-500/20');
+            statusMessage.textContent = "Extrayendo datos de la boleta y guardando en Sheets...";
+            statusMessage.className = "mt-4 text-center text-xs font-medium p-3 rounded-xl border bg-brand-500/10 text-brand-400 border-brand-500/20";
+
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = async function() {
+                const base64Data = reader.result.split(',')[1];
+
+                try {
+                    const response = await fetch(WEB_APP_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            image: base64Data,
+                            comment: comentario
+                        })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.status === 'success') {
+                        statusMessage.textContent = `¡Éxito! ${result.data.comercio} - $${result.data.monto} guardado correctamente.`;
+                        statusMessage.className = "mt-4 text-center text-xs font-medium p-3 rounded-xl border bg-emerald-500/10 text-emerald-500 border-emerald-500/20";
+                        boletaForm.reset();
+                        previewContainer.classList.add('hidden');
+                        uploadPlaceholder.classList.remove('hidden');
+                    } else {
+                        throw new Error(result.message || 'Error desconocido');
+                    }
+                } catch (error) {
+                    statusMessage.textContent = "Error al procesar: " + error.message;
+                    statusMessage.className = "mt-4 text-center text-xs font-medium p-3 rounded-xl border bg-rose-500/10 text-rose-500 border-rose-500/20";
+                } finally {
+                    btnEnviar.disabled = false;
+                    btnEnviar.innerHTML = `<i data-lucide="cpu" class="w-5 h-5"></i> Procesar con IA y Guardar`;
+                    lucide.createIcons();
+                }
+            };
+        });
+
+        // Dashboard con Chart.js
+        let chartInstance = null;
+        async function cargarDashboard() {
+            try {
+                const response = await fetch(WEB_APP_URL);
+                const data = await response.json();
+                renderizarGrafico(data.gastos || []);
+            } catch (err) {
+                renderizarGrafico([
+                    { categoria: 'Supermercado', monto: 45000, comercio: 'Lider', fecha: '2026-03-20' },
+                    { categoria: 'Restaurante', monto: 22000, comercio: 'Starbucks', fecha: '2026-03-22' },
+                    { categoria: 'Transporte', monto: 15000, comercio: 'Cabify', fecha: '2026-03-24' }
+                ]);
+            }
+        }
+
+        function renderizarGrafico(gastos) {
+            let total = gastos.reduce((acc, curr) => acc + Number(curr.monto || 0), 0);
+            document.getElementById('statTotal').textContent = `$${total.toLocaleString('es-CL')}`;
+            document.getElementById('statCount').textContent = gastos.length;
+
+            let categorias = {};
+            gastos.forEach(g => {
+                let cat = g.categoria || 'Otros';
+                categorias[cat] = (categorias[cat] || 0) + Number(g.monto || 0);
+            });
+
+            const ctx = document.getElementById('categoryChart').getContext('2d');
+            if (chartInstance) chartInstance.destroy();
+
+            const isDark = document.documentElement.classList.contains('dark');
+
+            chartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(categorias),
+                    datasets: [{
+                        data: Object.values(categorias),
+                        backgroundColor: ['#00b4d8', '#0077b6', '#48cae4', '#90e0ef', '#03045e'],
+                        borderWidth: isDark ? 2 : 0,
+                        borderColor: isDark ? '#090d16' : '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: isDark ? '#94a3b8' : '#334155',
+                                font: { size: 11 }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const recentList = document.getElementById('recentList');
+            if(gastos.length === 0) {
+                recentList.innerHTML = `<p class="text-slate-500 text-center py-2">No hay gastos registrados aún.</p>`;
+            } else {
+                recentList.innerHTML = gastos.slice(-3).reverse().map(g => `
+                    <div class="flex justify-between items-center p-2 rounded-lg bg-slate-900 dark:bg-slate-900 bg-white border border-slate-800">
+                        <div>
+                            <span class="font-semibold text-slate-200">${g.comercio}</span>
+                            <span class="block text-[10px] text-slate-500">${g.categoria} • ${g.fecha || 'Hoy'}</span>
+                        </div>
+                        <span class="font-bold text-brand-500">$${Number(g.monto).toLocaleString('es-CL')}</span>
+                    </div>
+                `).join('');
+            }
+        }
+    </script>
+</body>
+</html>
