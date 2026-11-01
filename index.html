@@ -106,27 +106,27 @@
         <!-- TABS DE NAVEGACIÓN -->
         <div class="flex bg-slate-950 dark:bg-slate-950 bg-slate-100 p-1.5 rounded-2xl mb-6 border border-slate-800 dark:border-slate-800 border-slate-200">
             <button onclick="switchTab('scanner')" id="tabScanner" class="flex-1 py-2.5 rounded-xl font-semibold text-xs transition flex items-center justify-center gap-2 bg-brand-600 text-white shadow-md">
-                <i data-lucide="camera" class="w-4 h-4"></i> Registrar Boleta
+                <i data-lucide="camera" class="w-4 h-4"></i> Registrar Gasto
             </button>
             <button onclick="switchTab('dashboard')" id="tabDashboard" class="flex-1 py-2.5 rounded-xl font-semibold text-xs transition flex items-center justify-center gap-2 text-slate-400 hover:text-white">
                 <i data-lucide="pie-chart" class="w-4 h-4"></i> Dashboard Gasto
             </button>
         </div>
 
-        <!-- SECCIÓN 1: FORMULARIO DE REGISTRO CON FOTO -->
+        <!-- SECCIÓN 1: FORMULARIO DE REGISTRO MANUAL CON FOTO -->
         <div id="viewScanner" class="space-y-4">
             <form id="boletaForm" class="space-y-4">
                 
                 <!-- CAPTURA / VISTA PREVIA DE FOTO -->
                 <div class="border-2 border-dashed border-slate-700 hover:border-brand-500 transition rounded-2xl p-5 text-center bg-slate-950/40 dark:bg-slate-950/40 bg-slate-50 relative">
-                    <input type="file" id="fotoInput" accept="image/*" capture="environment" required
+                    <input type="file" id="fotoInput" accept="image/*" capture="environment"
                         class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
                     
                     <div id="uploadPlaceholder" class="space-y-2">
                         <div class="w-12 h-12 rounded-full bg-brand-500/10 text-brand-500 flex items-center justify-center mx-auto">
                             <i data-lucide="camera" class="w-6 h-6"></i>
                         </div>
-                        <p class="text-sm font-semibold text-slate-300">Toca para fotografiar la boleta</p>
+                        <p class="text-sm font-semibold text-slate-300">Toca para fotografiar la boleta (Opcional)</p>
                         <p class="text-xs text-slate-500">Sube la foto para adjuntarla al registro</p>
                     </div>
 
@@ -136,7 +136,7 @@
                     </div>
                 </div>
 
-                <!-- CAMPOS DE VERIFICACIÓN MANUAL -->
+                <!-- CAMPOS DE REGISTRO -->
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-xs font-semibold uppercase tracking-wider mb-1 text-slate-400">Monto Total ($)</label>
@@ -157,6 +157,14 @@
                             class="w-full px-3.5 py-2.5 bg-slate-950 dark:bg-slate-950 bg-slate-100 border border-slate-800 dark:border-slate-800 border-slate-300 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-brand-500 transition text-sm">
                     </div>
                     <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider mb-1 text-slate-400">Banco / Wallet</label>
+                        <input type="text" id="bancoInput" placeholder="Ej: Santander, Google Wallet..."
+                            class="w-full px-3.5 py-2.5 bg-slate-950 dark:bg-slate-950 bg-slate-100 border border-slate-800 dark:border-slate-800 border-slate-300 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-brand-500 transition text-sm">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
                         <label class="block text-xs font-semibold uppercase tracking-wider mb-1 text-slate-400">Categoría</label>
                         <select id="categoriaInput" class="w-full px-3.5 py-2.5 bg-slate-950 dark:bg-slate-950 bg-slate-100 border border-slate-800 dark:border-slate-800 border-slate-300 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-brand-500 transition text-sm">
                             <option value="Supermercado">Supermercado</option>
@@ -166,17 +174,16 @@
                             <option value="Otros" selected>Otros</option>
                         </select>
                     </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold uppercase tracking-wider mb-1 text-slate-400">Comentario opcional</label>
-                    <input type="text" id="comentarioInput" placeholder="Ej: Repuestos, almuerzo cliente..."
-                        class="w-full px-3.5 py-2.5 bg-slate-950 dark:bg-slate-950 bg-slate-100 border border-slate-800 dark:border-slate-800 border-slate-300 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-brand-500 transition text-sm">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider mb-1 text-slate-400">Comentario</label>
+                        <input type="text" id="comentarioInput" placeholder="Opcional..."
+                            class="w-full px-3.5 py-2.5 bg-slate-950 dark:bg-slate-950 bg-slate-100 border border-slate-800 dark:border-slate-800 border-slate-300 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-brand-500 transition text-sm">
+                    </div>
                 </div>
 
                 <button type="submit" id="btnEnviar"
                     class="w-full py-4 px-4 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-xl transition duration-200 shadow-lg shadow-brand-600/30 flex items-center justify-center gap-2 mt-2">
-                    <i data-lucide="check-circle" class="w-5 h-5"></i> Confirmar y Guardar Gasto
+                    <i data-lucide="check-circle" class="w-5 h-5"></i> Registrar Gasto en Planilla
                 </button>
             </form>
 
@@ -191,7 +198,7 @@
                     <h3 id="statTotal" class="text-2xl font-black text-brand-500 mt-1">$0</h3>
                 </div>
                 <div class="bg-slate-950 dark:bg-slate-950 bg-slate-100 p-4 rounded-2xl border border-slate-800 dark:border-slate-800 border-slate-200">
-                    <span class="text-xs text-slate-400 font-medium">Boletas Registradas</span>
+                    <span class="text-xs text-slate-400 font-medium">Gastos Registrados</span>
                     <h3 id="statCount" class="text-2xl font-black text-white mt-1">0</h3>
                 </div>
             </div>
@@ -220,10 +227,9 @@
     <script>
         lucide.createIcons();
         
-        // Enlace URL de tu Google Apps Script
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwdrRPRfq6718eixhC5_xPMeG6DsASKrkyogKCTpW5BGu-wAoYQZjJ2VT9w0Mw8Yzm2/exec";
+        // Enlace URL de tu Google Apps Script actualizado
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwNMfM5yFezzeU5IbGQqwrj8RMToBtNOcgG12qW5aJRq2XzEP9Vxyk7w1j5VNhWn1K4/exec";
 
-        // Cargar fecha actual por defecto en el selector
         document.getElementById('fechaInput').value = new Date().toISOString().substring(0, 10);
 
         function toggleTheme() {
@@ -324,86 +330,87 @@
             e.preventDefault();
             const file = fotoInput.files[0];
             const comercio = document.getElementById('comercioInput').value.trim();
+            const banco = document.getElementById('bancoInput').value.trim() || "Manual";
             const monto = document.getElementById('montoInput').value.trim();
             const fecha = document.getElementById('fechaInput').value;
             const categoria = document.getElementById('categoriaInput').value;
             const comentario = document.getElementById('comentarioInput').value.trim();
-
-            if (!file) {
-                alert("Por favor toma o sube una foto de la boleta.");
-                return;
-            }
 
             btnEnviar.disabled = true;
             btnEnviar.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Guardando registro...`;
             lucide.createIcons();
 
             statusMessage.classList.remove('hidden');
-            statusMessage.textContent = "Procesando imagen y enviando a Google Sheets...";
+            statusMessage.textContent = "Enviando datos a Google Sheets...";
             statusMessage.className = "mt-4 text-center text-xs font-medium p-3 rounded-xl border bg-brand-500/10 text-brand-400 border-brand-500/20";
 
             try {
-                // Comprimir imagen antes de enviar
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = async function(event) {
-                    const img = new Image();
-                    img.src = event.target.result;
-                    img.onload = async function() {
-                        const canvas = document.createElement('canvas');
-                        const MAX_WIDTH = 1000;
-                        let width = img.width;
-                        let height = img.height;
-                        if (width > MAX_WIDTH) {
-                            height *= MAX_WIDTH / width;
-                            width = MAX_WIDTH;
-                        }
-                        canvas.width = width;
-                        canvas.height = height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, width, height);
-                        const base64Data = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+                const enviarDatos = async (base64Img = "") => {
+                    const response = await fetch(WEB_APP_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            imagenBase64: base64Img,
+                            comercio: comercio,
+                            banco: banco,
+                            fecha: fecha,
+                            monto: monto,
+                            categoria: categoria,
+                            comentario: comentario,
+                            textoOCR: "Registro manual vía Web App"
+                        })
+                    });
 
-                        // Enviar datos verificados a Google Apps Script
-                        const response = await fetch(WEB_APP_URL, {
-                            method: 'POST',
-                            body: JSON.stringify({
-                                imagenBase64: base64Data,
-                                comercio: comercio,
-                                fecha: fecha,
-                                monto: monto,
-                                categoria: categoria,
-                                comentario: comentario,
-                                textoOCR: "Registro verificado manualmente"
-                            })
-                        });
-
-                        const resJson = await response.json();
-                        if (resJson.status === 'success') {
-                            statusMessage.textContent = `¡Gasto en ${comercio} ($${Number(monto).toLocaleString('es-CL')}) guardado con éxito!`;
-                            statusMessage.className = "mt-4 text-center text-xs font-medium p-3 rounded-xl border bg-emerald-500/10 text-emerald-500 border-emerald-500/20";
-                            
-                            // Limpiar formulario
-                            boletaForm.reset();
-                            document.getElementById('fechaInput').value = new Date().toISOString().substring(0, 10);
-                            previewContainer.classList.add('hidden');
-                            uploadPlaceholder.classList.remove('hidden');
-                            cargarDashboard();
-                        } else {
-                            throw new Error(resJson.message);
-                        }
-
-                        btnEnviar.disabled = false;
-                        btnEnviar.innerHTML = `<i data-lucide="check-circle" class="w-5 h-5"></i> Confirmar y Guardar Gasto`;
-                        lucide.createIcons();
+                    const resJson = await response.json();
+                    if (resJson.status === 'success') {
+                        statusMessage.textContent = `¡Gasto en ${comercio} ($${Number(monto).toLocaleString('es-CL')}) guardado con éxito!`;
+                        statusMessage.className = "mt-4 text-center text-xs font-medium p-3 rounded-xl border bg-emerald-500/10 text-emerald-500 border-emerald-500/20";
+                        
+                        boletaForm.reset();
+                        document.getElementById('fechaInput').value = new Date().toISOString().substring(0, 10);
+                        previewContainer.classList.add('hidden');
+                        uploadPlaceholder.classList.remove('hidden');
+                        cargarDashboard();
+                    } else {
+                        throw new Error(resJson.message);
                     }
+
+                    btnEnviar.disabled = false;
+                    btnEnviar.innerHTML = `<i data-lucide="check-circle" class="w-5 h-5"></i> Registrar Gasto en Planilla`;
+                    lucide.createIcons();
                 };
+
+                if (file) {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.onload = async function(event) {
+                        const img = new Image();
+                        img.src = event.target.result;
+                        img.onload = async function() {
+                            const canvas = document.createElement('canvas');
+                            const MAX_WIDTH = 1000;
+                            let width = img.width;
+                            let height = img.height;
+                            if (width > MAX_WIDTH) {
+                                height *= MAX_WIDTH / width;
+                                width = MAX_WIDTH;
+                            }
+                            canvas.width = width;
+                            canvas.height = height;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0, width, height);
+                            const base64Data = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+                            await enviarDatos(base64Data);
+                        }
+                    };
+                } else {
+                    await enviarDatos("");
+                }
 
             } catch (error) {
                 statusMessage.textContent = "Error: " + error.message;
                 statusMessage.className = "mt-4 text-center text-xs font-medium p-3 rounded-xl border bg-rose-500/10 text-rose-500 border-rose-500/20";
                 btnEnviar.disabled = false;
-                btnEnviar.innerHTML = `<i data-lucide="check-circle" class="w-5 h-5"></i> Confirmar y Guardar Gasto`;
+                btnEnviar.innerHTML = `<i data-lucide="check-circle" class="w-5 h-5"></i> Registrar Gasto en Planilla`;
                 lucide.createIcons();
             }
         });
@@ -467,11 +474,15 @@
                     if (g.fecha) {
                         fechaMostrar = String(g.fecha).substring(0, 10);
                     }
+                    let bancoBadge = g.banco ? `<span class="text-[10px] text-brand-400 font-semibold bg-brand-500/10 px-1.5 py-0.5 rounded">${g.banco}</span>` : '';
                     return `
-                        <div class="flex justify-between items-center p-2 rounded-lg bg-slate-900 dark:bg-slate-900 bg-white border border-slate-800">
+                        <div class="flex justify-between items-center p-2.5 rounded-lg bg-slate-900 dark:bg-slate-900 bg-white border border-slate-800">
                             <div>
-                                <span class="font-semibold text-slate-200">${g.comercio}</span>
-                                <span class="block text-[10px] text-slate-500">${g.categoria} • ${fechaMostrar}</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="font-semibold text-slate-200">${g.comercio}</span>
+                                    ${bancoBadge}
+                                </div>
+                                <span class="block text-[10px] text-slate-500 mt-0.5">${g.categoria} • ${fechaMostrar}</span>
                             </div>
                             <span class="font-bold text-brand-500">$${Number(g.monto).toLocaleString('es-CL')}</span>
                         </div>
