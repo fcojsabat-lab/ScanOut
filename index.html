@@ -33,7 +33,7 @@
             }
         }
     </script>
-    <!-- Chart.js para el Dashboard -->
+    <!-- Chart.js para Dashboard -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -95,7 +95,7 @@
                 </div>
                 <div>
                     <h2 class="text-lg font-bold text-slate-900 dark:text-white leading-tight">Scan<span class="text-brand-500">Out</span></h2>
-                    <span class="text-xs text-emerald-500 font-medium flex items-center gap-1">● Sesión Activa (Renata)</span>
+                    <span class="text-xs text-emerald-500 font-medium flex items-center gap-1">● Sesión Activa</span>
                 </div>
             </div>
             <button id="btnLogout" class="text-xs text-slate-400 hover:text-rose-500 transition flex items-center gap-1 font-medium bg-slate-800/50 dark:bg-slate-800/50 bg-slate-100 px-3 py-1.5 rounded-lg">
@@ -116,8 +116,6 @@
         <!-- SECCIÓN 1: FORMULARIO DE REGISTRO MANUAL CON FOTO -->
         <div id="viewScanner" class="space-y-4">
             <form id="boletaForm" class="space-y-4">
-                
-                <!-- CAPTURA / VISTA PREVIA DE FOTO -->
                 <div class="border-2 border-dashed border-slate-700 hover:border-brand-500 transition rounded-2xl p-5 text-center bg-slate-950/40 dark:bg-slate-950/40 bg-slate-50 relative">
                     <input type="file" id="fotoInput" accept="image/*" capture="environment"
                         class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
@@ -129,14 +127,12 @@
                         <p class="text-sm font-semibold text-slate-300">Toca para fotografiar la boleta (Opcional)</p>
                         <p class="text-xs text-slate-500">Sube la foto para adjuntarla al registro</p>
                     </div>
-
                     <div id="previewContainer" class="hidden relative">
                         <img id="imagePreview" class="mx-auto max-h-48 rounded-xl border border-slate-700 object-contain shadow-md">
                         <span class="absolute bottom-2 right-2 bg-black/70 text-white text-[10px] px-2 py-1 rounded-md">Foto lista para guardar</span>
                     </div>
                 </div>
 
-                <!-- CAMPOS DE REGISTRO -->
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-xs font-semibold uppercase tracking-wider mb-1 text-slate-400">Monto Total ($)</label>
@@ -186,7 +182,6 @@
                     <i data-lucide="check-circle" class="w-5 h-5"></i> Registrar Gasto en Planilla
                 </button>
             </form>
-
             <div id="statusMessage" class="mt-4 text-center text-xs hidden font-medium p-3 rounded-xl border"></div>
         </div>
 
@@ -227,8 +222,9 @@
     <script>
         lucide.createIcons();
         
-        // Enlace URL de tu Google Apps Script actualizado
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwNMfM5yFezzeU5IbGQqwrj8RMToBtNOcgG12qW5aJRq2XzEP9Vxyk7w1j5VNhWn1K4/exec";
+        // URL NUEVA DE GOOGLE APPS SCRIPT
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxG75c2Cveab92XCZHj7c-RU9U3H1lVb2Kivcc7Jgt5fmvONMMIIvNoEF-JDPVqTGTV/exec";
+        const API_SECRET_TOKEN = "panchoyrenata2026"; // Debe coincidir con Code.gs
 
         document.getElementById('fechaInput').value = new Date().toISOString().substring(0, 10);
 
@@ -273,7 +269,7 @@
             e.preventDefault();
             const user = document.getElementById('userInput').value.trim();
             const pass = document.getElementById('passInput').value.trim();
-
+            
             if (user === 'Renata' && pass === 'Controlboleta') {
                 localStorage.setItem('sesion_activa', 'true');
                 loginError.classList.add('hidden');
@@ -349,6 +345,7 @@
                     const response = await fetch(WEB_APP_URL, {
                         method: 'POST',
                         body: JSON.stringify({
+                            secretToken: API_SECRET_TOKEN,
                             imagenBase64: base64Img,
                             comercio: comercio,
                             banco: banco,
@@ -359,8 +356,8 @@
                             textoOCR: "Registro manual vía Web App"
                         })
                     });
-
                     const resJson = await response.json();
+                    
                     if (resJson.status === 'success') {
                         statusMessage.textContent = `¡Gasto en ${comercio} ($${Number(monto).toLocaleString('es-CL')}) guardado con éxito!`;
                         statusMessage.className = "mt-4 text-center text-xs font-medium p-3 rounded-xl border bg-emerald-500/10 text-emerald-500 border-emerald-500/20";
@@ -373,7 +370,7 @@
                     } else {
                         throw new Error(resJson.message);
                     }
-
+                    
                     btnEnviar.disabled = false;
                     btnEnviar.innerHTML = `<i data-lucide="check-circle" class="w-5 h-5"></i> Registrar Gasto en Planilla`;
                     lucide.createIcons();
@@ -390,12 +387,14 @@
                             const MAX_WIDTH = 1000;
                             let width = img.width;
                             let height = img.height;
+                            
                             if (width > MAX_WIDTH) {
                                 height *= MAX_WIDTH / width;
                                 width = MAX_WIDTH;
                             }
                             canvas.width = width;
                             canvas.height = height;
+                            
                             const ctx = canvas.getContext('2d');
                             ctx.drawImage(img, 0, 0, width, height);
                             const base64Data = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
@@ -405,7 +404,6 @@
                 } else {
                     await enviarDatos("");
                 }
-
             } catch (error) {
                 statusMessage.textContent = "Error: " + error.message;
                 statusMessage.className = "mt-4 text-center text-xs font-medium p-3 rounded-xl border bg-rose-500/10 text-rose-500 border-rose-500/20";
@@ -416,6 +414,7 @@
         });
 
         let chartInstance = null;
+
         async function cargarDashboard() {
             try {
                 const response = await fetch(WEB_APP_URL);
@@ -441,7 +440,6 @@
             if (chartInstance) chartInstance.destroy();
 
             const isDark = document.documentElement.classList.contains('dark');
-
             chartInstance = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
@@ -469,11 +467,8 @@
             if(gastos.length === 0) {
                 recentList.innerHTML = `<p class="text-slate-500 text-center py-2">No hay gastos registrados aún.</p>`;
             } else {
-                recentList.innerHTML = gastos.slice(-3).reverse().map(g => {
-                    let fechaMostrar = 'Hoy';
-                    if (g.fecha) {
-                        fechaMostrar = String(g.fecha).substring(0, 10);
-                    }
+                recentList.innerHTML = gastos.slice(-5).reverse().map(g => {
+                    let fechaMostrar = g.fecha ? String(g.fecha).substring(0, 10) : 'Hoy';
                     let bancoBadge = g.banco ? `<span class="text-[10px] text-brand-400 font-semibold bg-brand-500/10 px-1.5 py-0.5 rounded">${g.banco}</span>` : '';
                     return `
                         <div class="flex justify-between items-center p-2.5 rounded-lg bg-slate-900 dark:bg-slate-900 bg-white border border-slate-800">
